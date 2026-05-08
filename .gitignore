@@ -25,4 +25,17 @@ build/
 # Ruff stuff:
 .ruff_cache/
 
+# direnv — local env vars (may contain secrets)
+.envrc
 
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+tf/**/builds/
+# Keep .terraform.lock.hcl committed — it pins provider versions (like uv.lock)
+
+# AWS
+*.pem
+*.key
