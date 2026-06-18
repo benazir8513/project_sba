@@ -1,9 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Tell hatchling where our package lives (src/ layout)
+# This makes `from app.models.whimling import Whimling` work after `uv sync`
+[tool.hatch.build.targets.wheel]
+packages = ["src/app"]
+
 [project]
 name = "project-sba"
 version = "0.1.0"
-description = "Add your description here"
+description = "Project SBA — The Grimoire of a Living Creature. A mystical pet simulator for learning Python backend concepts."
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pydantic>=2.13.4",
+    "pymongo>=4.17.0",
+]
 
 [dependency-groups]
 dev = [
@@ -39,7 +51,9 @@ exclude = [
     "site-packages",
     "venv",
     "tf",
-    "task"
+    "task",
+    "milestones",
+    "archive",
 ]
 line-length = 150
 indent-width = 4
@@ -60,5 +74,8 @@ select = [
     "I",
 ]
 
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
 [tool.pyrefly]
-project-excludes = [".venv/**", "tf/**", ".git/**", ".github/**", "build/**"]
+project-excludes = [".venv/**", "tf/**", ".git/**", ".github/**", "build/**", "milestones/**", "archive/**"]

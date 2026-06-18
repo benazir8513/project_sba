@@ -39,3 +39,10 @@ tf/**/builds/
 # AWS
 *.pem
 *.key
+
+# Project data — local save files, not committed
+data/
+
+# Environment — contains connection strings
+.env.local
+
