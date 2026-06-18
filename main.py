@@ -24,8 +24,10 @@ but the dispatch pattern here teaches you what frameworks do under the hood.
 """
 
 import sys
+from collections.abc import Callable
 
 from app.handlers.egg import create_egg, load_whimling
+from app.models.whimling import Whimling
 
 # ---------------------------------------------------------------------------
 # Command implementations
@@ -34,9 +36,9 @@ from app.handlers.egg import create_egg, load_whimling
 
 def cmd_create(args: list[str]) -> None:
     """Create a new Whimling egg. Optionally pass a name as the first argument."""
-    name = args[0] if args else "Lumis"
+    name: str = args[0] if args else "Lumis"
     try:
-        whimling = create_egg(name)
+        whimling: Whimling = create_egg(name)
         print(f"\n🥚  A new egg has appeared — {whimling.name} has entered the world.\n")
         print(f"   State   : {whimling.state.value}")
         print(f"   Warmth  : {whimling.egg.warmth}/100")
@@ -53,7 +55,7 @@ def cmd_status(args: list[str]) -> None:
     # args is unused for now — kept for consistency with the dispatch signature
     _ = args
     try:
-        w = load_whimling()
+        w: Whimling = load_whimling()
     except FileNotFoundError as e:
         print(f"\n❌  {e}\n")
         sys.exit(1)
@@ -72,7 +74,7 @@ def cmd_status(args: list[str]) -> None:
 # Dispatch table — maps command name → handler function
 # Every function has the same signature: (args: list[str]) -> None
 # ---------------------------------------------------------------------------
-COMMANDS: dict[str, object] = {
+COMMANDS: dict[str, Callable[[list[str]], None]] = {
     "create": cmd_create,
     "status": cmd_status,
 }
@@ -92,19 +94,21 @@ Commands:
 
 
 def main() -> None:
-    args = sys.argv[1:]  # Drop the script name at index 0
+    args: list[str] = sys.argv[1:]  # Drop the script name at index 0
 
     if not args:
         print(f"\n{USAGE}\n")
         sys.exit(0)
 
+    command: str
+    rest: list[str]
     command, *rest = args  # Unpack: first item is the command, rest are its args
 
     if command not in COMMANDS:
         print(f"\n❌  Unknown command: '{command}'\n\n{USAGE}\n")
         sys.exit(1)
 
-    COMMANDS[command](rest)  # type: ignore[operator]
+    COMMANDS[command](rest)
 
 
 if __name__ == "__main__":

@@ -29,6 +29,7 @@ ARCHITECTURE NOTE:
 
 import json
 from pathlib import Path
+from typing import Any
 
 from app.models.whimling import Egg, Whimling, WhimlingState
 
@@ -36,8 +37,8 @@ from app.models.whimling import Egg, Whimling, WhimlingState
 # Storage paths
 # All paths are relative to where Python is invoked (the project root).
 # ---------------------------------------------------------------------------
-DATA_DIR = Path("data")
-SAVE_FILE = DATA_DIR / "whimling.json"
+DATA_DIR: Path = Path("data")
+SAVE_FILE: Path = DATA_DIR / "whimling.json"
 
 
 # ---------------------------------------------------------------------------
@@ -60,7 +61,7 @@ def save_whimling(whimling: Whimling) -> None:
     With mode="json", Pydantic converts everything to JSON-safe primitives first.
     """
     _ensure_data_dir()
-    data = whimling.model_dump(mode="json")
+    data: dict[str, Any] = whimling.model_dump(mode="json")
     SAVE_FILE.write_text(json.dumps(data, indent=2))
 
 
@@ -74,9 +75,9 @@ def load_whimling() -> Whimling:
     If the file contains invalid data (corrupted JSON, wrong types), Pydantic
     raises a ValidationError with a clear message about what failed.
     """
-    if not SAVE_FILE.exists():
+    if not whimling_exists():
         raise FileNotFoundError(f"No save file found at '{SAVE_FILE}'. Run `python main.py create` first to bring your Whimling into existence.")
-    data = json.loads(SAVE_FILE.read_text())
+    data: dict[str, Any] = json.loads(SAVE_FILE.read_text())
     return Whimling.model_validate(data)
 
 
@@ -103,6 +104,6 @@ def create_egg(name: str) -> Whimling:
     if whimling_exists():
         raise FileExistsError("A Whimling already exists! Use `python main.py status` to check on it.")
 
-    whimling = Whimling(name=name, state=WhimlingState.EGG, egg=Egg())
+    whimling: Whimling = Whimling(name=name, state=WhimlingState.EGG, egg=Egg())
     save_whimling(whimling)
     return whimling
