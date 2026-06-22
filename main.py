@@ -14,8 +14,9 @@ LEARNING NOTE — what this file teaches:
 HOW TO RUN:
   uv run python main.py <command> [args]
 
-CURRENT COMMANDS (Milestone 0):
+CURRENT COMMANDS (Milestones 0–1):
   create [name]  — Create a new egg (default name: Lumis)
+  warm           — Warm the egg; eventually hatches it
   status         — Show the current state of your Whimling
 
 FUTURE COMMANDS will be added here as milestones progress.
@@ -26,8 +27,8 @@ but the dispatch pattern here teaches you what frameworks do under the hood.
 import sys
 from collections.abc import Callable
 
-from app.handlers.egg import create_egg, load_whimling
-from app.models.whimling import Whimling
+from app.handlers.egg import create_egg, load_whimling, warm_egg
+from app.models.whimling import Whimling, WhimlingState
 
 # ---------------------------------------------------------------------------
 # Command implementations
@@ -50,9 +51,65 @@ def cmd_create(args: list[str]) -> None:
         sys.exit(1)
 
 
+def cmd_warm(args: list[str]) -> None:
+    """
+    Warm the egg. Repeated warming causes cracks; 10 cracks → hatching.
+
+    LEARNING: tuple unpacking
+    --------------------------
+    warm_egg() returns three values packed as a tuple:
+      (updated_whimling, warmth_gained, just_hatched)
+    Python lets you unpack them in one line:
+      w, gained, hatched = warm_egg()
+    This keeps the handler focused on the *result* without needing to
+    re-load the file or re-compute anything.
+    """
+    _ = args  # no arguments needed for this command
+    try:
+        w, gained, just_hatched = warm_egg()
+    except FileNotFoundError as e:
+        print(f"\n❌  {e}\n")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"\n⚠️   {e}\n")
+        sys.exit(1)
+
+    if just_hatched:
+        # ✨ The big moment — egg has cracked open!
+        print(f"\n🐣  {w.name} has HATCHED!\n")
+        print("   The shell falls away. Something small and luminous blinks back at you.")
+        print(f"\n   State   : {w.state.value}")
+        print(f"   Warmth  : {w.egg.warmth}/100")
+        print(f"   Cracks  : {w.egg.cracks}/10")
+        print("\n   Run `python main.py status` to see your newborn Whimling.\n")
+    elif w.egg.cracks > 0:
+        # Cracking has started
+        print(f"\n🔥  You warm {w.name}'s egg. (+{gained} warmth)")
+        print(f"   Warmth  : {w.egg.warmth}/100")
+        print(f"   Cracks  : {w.egg.cracks}/10  ← the shell is starting to crack!")
+        print(f"\n   Keep going — {10 - w.egg.cracks} more crack(s) until it hatches.\n")
+    else:
+        # Pre-cracking phase
+        print(f"\n🔥  You warm {w.name}'s egg. (+{gained} warmth)")
+        print(f"   Warmth  : {w.egg.warmth}/100")
+        print(f"   Cracks  : {w.egg.cracks}/10")
+        if w.egg.warmth >= 80:
+            print("   The shell is hot to the touch — cracks are forming!\n")
+        else:
+            needed = 80 - w.egg.warmth
+            print(f"   {needed} more warmth needed before cracks appear.\n")
+
+
 def cmd_status(args: list[str]) -> None:
-    """Print the current state of the Whimling."""
-    # args is unused for now — kept for consistency with the dispatch signature
+    """
+    Print the current state of the Whimling.
+
+    LEARNING: branching display logic
+    ----------------------------------
+    The model holds *data*; main.py decides *how to display it*.
+    Different states show different information — that's fine.
+    The key principle: display logic lives here, not inside the model.
+    """
     _ = args
     try:
         w: Whimling = load_whimling()
@@ -62,10 +119,24 @@ def cmd_status(args: list[str]) -> None:
 
     print(f"\n✨  {w.name}")
     print(f"   State   : {w.state.value}")
-    if w.state == w.state.EGG:
+
+    if w.state == WhimlingState.EGG:
         print(f"   Warmth  : {w.egg.warmth}/100")
         print(f"   Cracks  : {w.egg.cracks}/10")
         print(f"   Hatched : {w.egg.is_hatched}")
+        if w.egg.warmth < 80:
+            print(f"   Hint    : {80 - w.egg.warmth} more warmth before cracking begins")
+        else:
+            print(f"   Hint    : {10 - w.egg.cracks} crack(s) remaining until hatching!")
+
+    elif w.state == WhimlingState.HATCHLING:
+        print("   The shell is gone. Your Whimling blinks at the world for the first time.")
+        print("   (Vital Signs — Milestone 2 — will add hunger, happiness, and energy.)")
+
+    else:
+        # Future states (juvenile, adult, elder, dormant) handled in later milestones
+        print(f"   (State '{w.state.value}' display will be added in a future milestone.)")
+
     print(f"   Age     : {w.age_days:.1f} days")
     print(f"   Born    : {w.created_at.strftime('%Y-%m-%d %H:%M:%S UTC')}\n")
 
@@ -76,6 +147,7 @@ def cmd_status(args: list[str]) -> None:
 # ---------------------------------------------------------------------------
 COMMANDS: dict[str, Callable[[list[str]], None]] = {
     "create": cmd_create,
+    "warm": cmd_warm,
     "status": cmd_status,
 }
 
@@ -84,6 +156,7 @@ Usage: python main.py <command> [args]
 
 Commands:
   create [name]   Create a new egg (default name: Lumis)
+  warm            Warm the egg until it hatches
   status          Show the current state of your Whimling
 """.strip()
 

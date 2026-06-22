@@ -18,7 +18,7 @@
 | # | Title | Status | File |
 |---|-------|--------|------|
 | 0 | The Egg Exists 🥚 | ✅ Complete | [milestone_0.md](./milestone_0.md) |
-| 1 | Hatching 🐣 | ⏳ Pending | — |
+| 1 | Hatching 🐣 | ✅ Complete | [milestone_1.md](./milestone_1.md) |
 | 2 | Vital Signs 💓 | ⏳ Pending | — |
 | 3 | Persistence Layer Swap 🗄️ | ⏳ Pending | — |
 | 4 | Evolution 🦋 | ⏳ Pending | — |
