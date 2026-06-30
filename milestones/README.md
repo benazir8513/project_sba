@@ -24,12 +24,13 @@
 | 4 | Evolution 🦋 | ⏳ Pending | — |
 | 5 | Action Log & History 📜 | ⏳ Pending | — |
 | 6 | The World Expands 🌍 | ⏳ Pending | — |
-| 7 | Proper CLI ⌨️ | ⏳ Pending | — |
-| 8 | Testing 🧪 | ⏳ Pending | — |
-| 9 | Abilities & Cooldowns ⚡ | ⏳ Pending | — |
-| 10 | REST API 🌐 | ⏳ Pending | — |
-| 11 | Background Simulation 🔄 | ⏳ Pending | — |
-| 12 | Multi-Whimling & Relationships 👥 | ⏳ Pending | — |
+| 7 | Proper CLI ⌨️ (`typer` + `rich`) | ⏳ Pending | — |
+| 8 | Interactive TUI 🖥️ (`textual`) | ⏳ Pending | — |
+| 9 | Testing 🧪 | ⏳ Pending | — |
+| 10 | Abilities & Cooldowns ⚡ | ⏳ Pending | — |
+| 11 | REST API 🌐 | ⏳ Pending | — |
+| 12 | Background Simulation 🔄 | ⏳ Pending | — |
+| 13 | Multi-Whimling & Relationships 👥 | ⏳ Pending | — |
 
 ---
 

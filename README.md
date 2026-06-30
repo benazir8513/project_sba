@@ -88,7 +88,7 @@ The egg won't hatch on its own. You need to warm it. Each interaction nudges it 
 ---
 
 ### Milestone 2 — Vital Signs 💓
-**Concept: Multiple interacting attributes, decay over time, data integrity**
+**Concept: Multiple interacting attributes, decay over time, data integrity, argparse**
 
 A hatched Whimling has needs. If you ignore them, they decline.
 
@@ -100,8 +100,9 @@ A hatched Whimling has needs. If you ignore them, they decline.
 | 2.4 | Implement `rest()` handler — restores `energy`, time passes, hunger decreases | Simulating time passage |
 | 2.5 | Implement `tick()` — a "time passes" function that decays all stats slightly. Called automatically before every command | Middleware-like pattern, decorators or pre-hooks |
 | 2.6 | If `health` reaches 0, the Whimling enters `dormant` state (not dead — mystical creatures don't die, they sleep until revived) | Edge cases, guard clauses, graceful failure states |
+| 2.7 | Refactor `main.py` from raw `sys.argv` to `argparse` — subcommands for each action, `--help` for free | stdlib argument parsing, subparsers, auto-generated help |
 
-**End result:** A living creature with needs. Neglect it for two weeks and come back to find it dormant. Take care of it and it thrives.
+**End result:** A living creature with needs. Neglect it for two weeks and come back to find it dormant. Take care of it and it thrives. The CLI now has proper `--help` output and argument validation via `argparse`.
 
 ---
 
@@ -175,101 +176,120 @@ The Whimling doesn't live in a void. It has a home.
 ---
 
 ### Milestone 7 — Proper CLI ⌨️
-**Concept: CLI frameworks, user experience, input validation**
+**Concept: CLI frameworks, user experience, `rich` formatted output**
 
-Time to replace the raw `sys.argv` parsing with a real CLI.
+Replace `argparse` with a declarative framework and make every command beautiful with `rich`.
 
 | # | Task | What You Learn |
 |---|------|---------------|
-| 7.1 | Refactor all commands to use `click` or `typer` (both are excellent CLI frameworks) | CLI frameworks, decorators, command groups |
+| 7.1 | Refactor all commands to use `click` or `typer` | CLI frameworks, decorators, command groups |
 | 7.2 | Add help text, colored output, and confirmation prompts for dangerous actions | UX in CLI tools, ANSI colors, user feedback |
 | 7.3 | Add an interactive mode: `python main.py play-session` enters a loop where you can type commands freely | REPL pattern, input loops, graceful exit handling |
 | 7.4 | Add ASCII art for the Whimling's current evolution stage | String art, stage-based rendering, fun factor |
-| 7.5 | Add `python main.py dashboard` — a rich status screen showing stats, location, inventory, traits | Terminal UI, layout design, `rich` library |
+| 7.5 | Add `python main.py dashboard` — a `rich` status panel: tables, progress bars, and colour for stats, location, traits | `rich` library: `Console`, `Table`, `Panel`, `Progress`, `Text` with markup |
 
-**End result:** A polished CLI experience. It feels like a real app, not a script.
+**End result:** A polished, good-looking CLI. Every command prints structured, coloured output. `--help` is descriptive. `dashboard` gives a beautiful snapshot of the Whimling's world in the terminal.
 
 ---
 
-### Milestone 8 — Testing 🧪
+### Milestone 8 — Interactive TUI 🖥️
+**Concept: Reactive UI, component-based design, `textual`**
+
+Go beyond static output — build a live, interactive terminal application that updates in real time.
+
+| # | Task | What You Learn |
+|---|------|---------------|
+| 8.1 | Install `textual` and build a minimal `App` skeleton — understand the event loop and widget lifecycle | Textual app structure, `compose()`, `on_mount()`, CSS layout |
+| 8.2 | Build a `StatsWidget` that displays hunger, happiness, energy, health as live progress bars | Reactive attributes, `watch_*` methods, widget re-rendering |
+| 8.3 | Add an action panel — buttons for Feed, Play, Rest, Explore. Clicking one calls the real handler and updates the display | Message passing, `on_button_pressed`, connecting UI to business logic |
+| 8.4 | Add a scrollable event log panel that appends new entries as actions are taken | `ScrollView`, dynamic content, append-only display |
+| 8.5 | Style the TUI with Textual CSS — layout, colours, borders that change based on the Whimling's state | Textual CSS (`.tcss` files), conditional styling, pseudo-classes |
+
+**End result:** `python main.py tui` launches a full interactive application. Stats update live as you click actions. It feels like a desktop app — running entirely in your terminal.
+
+> 📖 **Why a separate milestone?** `rich` is about *formatting static output* — you build a string, print it, done. `textual` is about *reactive components* — widgets that live in memory, respond to events, and re-render themselves. These are fundamentally different mental models. Learning `rich` first (Milestone 7) means you already understand terminal rendering before Textual adds reactivity on top.
+
+---
+
+### Milestone 9 — Testing 🧪
 **Concept: Unit testing, mocking, test design, coverage**
 
 Make sure your creature's reality doesn't break when you change things.
 
 | # | Task | What You Learn |
 |---|------|---------------|
-| 8.1 | Set up `pytest` with a clean test structure (`tests/` mirroring `src/`) | Test setup, conftest.py, fixtures |
-| 8.2 | Write unit tests for all model validations (invalid stats, edge values) | Parameterized tests, boundary testing |
-| 8.3 | Write unit tests for handlers using a mock/in-memory repository | Mocking, dependency injection paying off |
-| 8.4 | Write integration tests that use the real `JsonFileRepository` with temp files | `tmp_path` fixture, integration vs unit tests |
-| 8.5 | Add test coverage reporting and aim for 80%+ on handlers | Coverage tools, understanding what to test |
-| 8.6 | Add tests to pre-commit hooks so they run before every commit | CI-like local workflow, quality gates |
+| 9.1 | Set up `pytest` with a clean test structure (`tests/` mirroring `src/`) | Test setup, conftest.py, fixtures |
+| 9.2 | Write unit tests for all model validations (invalid stats, edge values) | Parameterized tests, boundary testing |
+| 9.3 | Write unit tests for handlers using a mock/in-memory repository | Mocking, dependency injection paying off |
+| 9.4 | Write integration tests that use the real `JsonFileRepository` with temp files | `tmp_path` fixture, integration vs unit tests |
+| 9.5 | Add test coverage reporting and aim for 80%+ on handlers | Coverage tools, understanding what to test |
+| 9.6 | Add tests to pre-commit hooks so they run before every commit | CI-like local workflow, quality gates |
 
 **End result:** A solid test suite. You can refactor fearlessly.
 
 ---
 
-### Milestone 9 — Abilities & Cooldowns ⚡
+### Milestone 10 — Abilities & Cooldowns ⚡
 **Concept: Time-based systems, scheduling, cooldowns, command pattern**
 
 The Whimling learns abilities as it evolves. Abilities have cooldowns and costs.
 
 | # | Task | What You Learn |
 |---|------|---------------|
-| 9.1 | Create an `Ability` model: `name`, `description`, `energy_cost`, `cooldown_seconds`, `last_used` | Time-based data, datetime math |
-| 9.2 | Each evolution stage unlocks new abilities (data-driven from config) | Config-driven unlocks, progression systems |
-| 9.3 | Implement `use_ability(name)` handler — checks cooldown, deducts energy, applies effect | Validation chains, precondition checking |
-| 9.4 | Abilities have effects: "Forage" finds food, "Meditate" restores health, "Shimmer" reveals hidden items at a location | Command pattern, effect dispatch |
-| 9.5 | Add ability history to the event log | Extending existing systems cleanly |
+| 10.1 | Create an `Ability` model: `name`, `description`, `energy_cost`, `cooldown_seconds`, `last_used` | Time-based data, datetime math |
+| 10.2 | Each evolution stage unlocks new abilities (data-driven from config) | Config-driven unlocks, progression systems |
+| 10.3 | Implement `use_ability(name)` handler — checks cooldown, deducts energy, applies effect | Validation chains, precondition checking |
+| 10.4 | Abilities have effects: "Forage" finds food, "Meditate" restores health, "Shimmer" reveals hidden items at a location | Command pattern, effect dispatch |
+| 10.5 | Add ability history to the event log | Extending existing systems cleanly |
 
 **End result:** Your Whimling has a growing set of things it can *do*, not just stats that go up and down.
 
 ---
 
-### Milestone 10 — REST API 🌐
+### Milestone 11 — REST API 🌐
 **Concept: HTTP, REST, request/response, API design**
 
 Expose your Whimling's world through an API. The CLI becomes just one interface.
 
 | # | Task | What You Learn |
 |---|------|---------------|
-| 10.1 | Add `FastAPI` as a dependency. Create a basic `GET /whimling` endpoint that returns the current state | HTTP basics, FastAPI intro, JSON responses |
-| 10.2 | Add `POST /whimling/feed`, `POST /whimling/play`, etc. — all the existing handlers exposed as endpoints | REST verbs, route design, request bodies |
-| 10.3 | Add proper error responses (404 if no Whimling exists, 400 for invalid actions) | HTTP status codes, error handling in APIs |
-| 10.4 | Add `GET /whimling/history` with query params for pagination | Query parameters, pagination patterns |
-| 10.5 | Both CLI and API use the exact same handlers and repository — they're just different interfaces | Ports & adapters pattern, proving architecture works |
+| 11.1 | Add `FastAPI` as a dependency. Create a basic `GET /whimling` endpoint that returns the current state | HTTP basics, FastAPI intro, JSON responses |
+| 11.2 | Add `POST /whimling/feed`, `POST /whimling/play`, etc. — all the existing handlers exposed as endpoints | REST verbs, route design, request bodies |
+| 11.3 | Add proper error responses (404 if no Whimling exists, 400 for invalid actions) | HTTP status codes, error handling in APIs |
+| 11.4 | Add `GET /whimling/history` with query params for pagination | Query parameters, pagination patterns |
+| 11.5 | Both CLI and API use the exact same handlers and repository — they're just different interfaces | Ports & adapters pattern, proving architecture works |
 
 **End result:** Your Whimling is accessible via `curl` or a browser. Same creature, two ways to interact.
 
 ---
 
-### Milestone 11 — Background Simulation 🔄
+### Milestone 12 — Background Simulation 🔄
 **Concept: Background tasks, scheduling, concurrency basics**
 
 The Whimling's world doesn't stop when you're not looking.
 
 | # | Task | What You Learn |
 |---|------|---------------|
-| 11.1 | Implement a simple background ticker using `threading` or `asyncio` that runs `tick()` every N seconds when the API is running | Threading basics, background tasks, async intro |
-| 11.2 | The Whimling's stats decay in real-time while the server is running | Real-time simulation, state mutation over time |
-| 11.3 | Add a "mood" system derived from stats — if happiness is high, the Whimling occasionally "does things" on its own (logged as events) | Autonomous behavior, emergent systems |
-| 11.4 | Add WebSocket support — push stat updates to a connected client in real-time | WebSockets, push vs pull, real-time communication |
+| 12.1 | Implement a simple background ticker using `threading` or `asyncio` that runs `tick()` every N seconds when the API is running | Threading basics, background tasks, async intro |
+| 12.2 | The Whimling's stats decay in real-time while the server is running | Real-time simulation, state mutation over time |
+| 12.3 | Add a "mood" system derived from stats — if happiness is high, the Whimling occasionally "does things" on its own (logged as events) | Autonomous behavior, emergent systems |
+| 12.4 | Add WebSocket support — push stat updates to a connected client in real-time | WebSockets, push vs pull, real-time communication |
 
 **End result:** The Whimling feels alive. Leave the server running, come back, and things have happened.
 
 ---
 
-### Milestone 12 — Multi-Whimling & Relationships 👥
+### Milestone 13 — Multi-Whimling & Relationships 👥
 **Concept: Multi-entity management, relationships, CRUD at scale**
 
 One Whimling is lonely. Let it have companions.
 
 | # | Task | What You Learn |
 |---|------|---------------|
-| 12.1 | Support multiple Whimlings — each with a unique ID. Update repository to handle collections | UUIDs, collection management, CRUD operations |
-| 12.2 | Add a `bond` system — Whimlings near each other can form bonds (friendship/rivalry based on trait compatibility) | Relationship modeling, graph-like data |
-| 12.3 | Implement `interact(whimling_a, whimling_b)` — they play together, affecting both creatures' stats | Multi-entity transactions, consistency |
-| 12.4 | A Whimling in `elder` stage can produce a new egg, passing down some traits | Inheritance (conceptual), generational data |
+| 13.1 | Support multiple Whimlings — each with a unique ID. Update repository to handle collections | UUIDs, collection management, CRUD operations |
+| 13.2 | Add a `bond` system — Whimlings near each other can form bonds (friendship/rivalry based on trait compatibility) | Relationship modeling, graph-like data |
+| 13.3 | Implement `interact(whimling_a, whimling_b)` — they play together, affecting both creatures' stats | Multi-entity transactions, consistency |
+| 13.4 | A Whimling in `elder` stage can produce a new egg, passing down some traits | Inheritance (conceptual), generational data |
 
 **End result:** A small ecosystem of creatures that interact with each other.
 
@@ -304,8 +324,11 @@ These are standalone features you can tackle whenever you want a break from the 
 | **`mise`** | Tool version management |
 | **`ruff`** | Linting and formatting |
 | **`pyrefly`** | Type checking |
+| **`argparse`** | CLI argument parsing (Milestone 2 — stdlib, no install needed) |
 | **`pytest`** | Testing (Milestone 8+) |
 | **`click` or `typer`** | CLI framework (Milestone 7+) |
+| **`rich`** | Terminal formatting and layouts (Milestone 7+) |
+| **`textual`** | Interactive TUI framework (Milestone 7+) |
 | **`FastAPI`** | REST API (Milestone 10+) |
 | **SQLite** | Database (Milestone 3+, built into Python) |
 | **JSON files** | Initial persistence (Milestone 0–2) |
@@ -393,12 +416,13 @@ python main.py status
 | 9–10 | Milestone 4: Evolution | 2 sessions |
 | 11–12 | Milestone 5: Event Log | 1–2 sessions |
 | 13–14 | Milestone 6: World Expands | 2–3 sessions |
-| 15–16 | Milestone 7: Proper CLI | 2 sessions |
-| 17–18 | Milestone 8: Testing | 2 sessions |
-| 19–20 | Milestone 9: Abilities | 2 sessions |
-| 21–22 | Milestone 10: REST API | 2 sessions |
-| 23–24 | Milestone 11: Background Sim | 2 sessions |
-| 25–26 | Milestone 12: Multi-Whimling | 2 sessions |
+| 15–16 | Milestone 7: Proper CLI (`typer` + `rich`) | 2 sessions |
+| 17–18 | Milestone 8: Interactive TUI (`textual`) | 2–3 sessions |
+| 19–20 | Milestone 9: Testing | 2 sessions |
+| 21–22 | Milestone 10: Abilities | 2 sessions |
+| 23–24 | Milestone 11: REST API | 2 sessions |
+| 25–26 | Milestone 12: Background Sim | 2 sessions |
+| 27–28 | Milestone 13: Multi-Whimling | 2 sessions |
 
 At one session every two weeks, this is roughly **a year of learning content**. Each session is ~2–4 hours of focused work.
 
